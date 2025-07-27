@@ -30,7 +30,7 @@ replay_pid*
 
 # Gradle Wrapper
 !gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
+!gradle/wrapper/gradle-dowrapper.properties
 
 # Cache of project
 .gradletasknamecache
@@ -187,10 +187,6 @@ redis/data/
 # 성능 테스트 결과
 /benchmark/
 /load-test-results/
-
-# 문서 빌드 결과 (만약 docs 빌드한다면)
-/docs/_build/
-/docs/site/
 
 ### JetBrains IDE ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
