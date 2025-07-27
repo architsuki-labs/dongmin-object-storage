@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>청크 시스템 동작 과정</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            color: #ffd93d;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .file-box {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            min-width: 120px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .chunk-box {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border-radius: 8px;
+            padding: 15px 10px;
+            text-align: center;
+            min-width: 80px;
+            color: white;
+            font-size: 0.9rem;
+            margin: 5px;
+        }
+
+        .folder-structure {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: #ffd93d;
+            margin: 0 10px;
+        }
+
+        .database-table {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .database-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .database-table th {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            font-size: 1rem;
+            color: #ffd93d;
+        }
+
+        .database-table td {
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chunks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-number {
+            background: #4ecdc4;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .hash-demo {
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #ff6b6b 0%, #4ecdc4 100%);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .combine-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stream-box {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            min-width: 100px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .diagram {
+                flex-direction: column;
+            }
+
+            .chunks-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .combine-demo {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 style="text-align: center; font-size: 2.5rem; margin-bottom: 40px; color: #ffd93d;">
+        🧩 청크 시스템 동작 과정
+    </h1>
+
+    <!-- 1단계: 파일 분할 -->
+    <div class="step">
+        <div class="step-title">📤 1단계: 큰 파일을 4MB씩 자르기</div>
+
+        <div class="diagram">
+            <div class="file-box">
+                📹 movie.mp4<br>
+                <strong>1GB</strong><br>
+                (1,024MB)
+            </div>
+
+            <div class="arrow">✂️</div>
+
+            <div style="text-align: center;">
+                <div style="color: #ffd93d; font-size: 1.2rem; margin-bottom: 15px;">4MB씩 분할</div>
+                <div class="chunks-grid" style="max-width: 400px;">
+                    <div class="chunk-box">청크 0<br>4MB</div>
+                    <div class="chunk-box">청크 1<br>4MB</div>
+                    <div class="chunk-box">청크 2<br>4MB</div>
+                    <div class="chunk-box">청크 3<br>4MB</div>
+                    <div class="chunk-box">...</div>
+                    <div class="chunk-box">청크 255<br>4MB</div>
+                </div>
+                <div style="color: #4ecdc4; font-size: 1.1rem; margin-top: 10px;">
+                    <strong>총 256개 조각</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="hash-demo">
+            <strong>🔧 실제 코드 동작:</strong><br>
+            1. 파일을 4MB(4,194,304 바이트) 크기 배열로 읽기<br>
+            2. 각 청크마다 UUID 생성 (예: 12345678-abcd-efgh-ijkl-mnopqrstuvwx)<br>
+            3. 청크 번호 부여 (0, 1, 2, 3, ..., 255)
+        </div>
+    </div>
+
+    <!-- 2단계: 폴더 구조 -->
+    <div class="step">
+        <div class="step-title">📁 2단계: aa/bb/cc/ 3단계 폴더에 저장</div>
+
+        <div class="diagram">
+            <div style="text-align: center;">
+                <div class="chunk-box" style="margin-bottom: 20px;">
+                    청크 ID<br>
+                    <span class="highlight">12345678abcd...</span>
+                </div>
+
+                <div class="arrow" style="transform: rotate(90deg);">⬇️</div>
+
+                <div style="color: #ffd93d; margin: 15px 0;">
+                    UUID 앞 6자리로 폴더 경로 생성
+                </div>
+
+                <div class="folder-structure">
+                    /storage/chunks/<br>
+                    ├── <span class="highlight">12</span>/ ← 첫 2자리<br>
+                    │&nbsp;&nbsp;&nbsp;└── <span class="highlight">34</span>/ ← 다음 2자리<br>
+                    │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="highlight">56</span>/ ← 그 다음 2자리<br>
+                    │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── 12345678abcd... ← 실제 파일<br>
+                    ├── ab/<br>
+                    │&nbsp;&nbsp;&nbsp;└── cd/<br>
+                    │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── ef/<br>
+                    └── fe/<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;└── dc/<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── ba/
+                </div>
+            </div>
+        </div>
+
+        <div class="hash-demo">
+            <strong>🎯 왜 이렇게 하나요?</strong><br>
+            • 한 폴더에 최대 256개(16×16)만 들어감<br>
+            • 파일 찾기 속도: O(1) - 즉시 찾기 가능<br>
+            • 확장성: 무제한 파일 저장 가능
+        </div>
+    </div>
+
+    <!-- 3단계: 해시 계산 -->
+    <div class="step">
+        <div class="step-title">🔐 3단계: 각 청크의 MD5 해시 계산</div>
+
+        <div class="diagram">
+            <div class="chunk-box">
+                📄 청크 데이터<br>
+                (4MB 바이너리)
+            </div>
+
+            <div class="arrow">🔒</div>
+
+            <div style="text-align: center;">
+                <div style="color: #ffd93d; margin-bottom: 10px;">MD5 해시 계산</div>
+                <div class="hash-demo" style="display: inline-block; margin: 0;">
+                    a1b2c3d4e5f6g7h8
+                </div>
+                <div style="color: #4ecdc4; margin-top: 10px; font-size: 0.9rem;">
+                    (32자리 16진수 "지문")
+                </div>
+            </div>
+        </div>
+
+        <div class="hash-demo">
+            <strong>🛡️ 보안 검증 과정:</strong><br>
+            <div class="flow-step">
+                <div class="step-number">1</div>
+                <div>저장할 때: 청크 데이터 → MD5 계산 → "a1b2c3d4" 저장</div>
+            </div>
+            <div class="flow-step">
+                <div class="step-number">2</div>
+                <div>읽을 때: 청크 파일 → MD5 재계산 → "a1b2c3d4"</div>
+            </div>
+            <div class="flow-step">
+                <div class="step-number">3</div>
+                <div>비교: 저장된 해시 = 계산된 해시 → ✅ 안전함!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4단계: 데이터베이스 저장 -->
+    <div class="step">
+        <div class="step-title">🗄️ 4단계: 데이터베이스에 정보 기록</div>
+
+        <div style="margin: 20px 0;">
+            <h4 style="color: #ffd93d;">📋 Objects 테이블 (파일 정보)</h4>
+            <div class="database-table">
+                <table>
+                    <tr>
+                        <th>object_id</th>
+                        <th>파일명</th>
+                        <th>전체크기</th>
+                        <th>청크개수</th>
+                    </tr>
+                    <tr>
+                        <td>file-uuid-1234</td>
+                        <td>movie.mp4</td>
+                        <td>1,073,741,824</td>
+                        <td>256</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h4 style="color: #ffd93d;">🧩 Chunks 테이블 (청크 정보)</h4>
+            <div class="database-table">
+                <table>
+                    <tr>
+                        <th>chunk_id</th>
+                        <th>순서</th>
+                        <th>크기</th>
+                        <th>파일경로</th>
+                        <th>MD5</th>
+                    </tr>
+                    <tr>
+                        <td>chunk-uuid-001</td>
+                        <td>0</td>
+                        <td>4,194,304</td>
+                        <td>/storage/chunks/12/34/56/...</td>
+                        <td>a1b2c3d4...</td>
+                    </tr>
+                    <tr>
+                        <td>chunk-uuid-002</td>
+                        <td>1</td>
+                        <td>4,194,304</td>
+                        <td>/storage/chunks/ab/cd/ef/...</td>
+                        <td>e5f6g7h8...</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;" colspan="5">... (총 256개 레코드)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5단계: 다운로드 -->
+    <div class="step">
+        <div class="step-title">📥 5단계: 다운로드 시 청크 합치기</div>
+
+        <div class="flow-step">
+            <div class="step-number">1</div>
+            <div>클라이언트: "movie.mp4 다운로드 요청"</div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-number">2</div>
+            <div>DB 조회: Objects 테이블에서 파일 정보 찾기</div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-number">3</div>
+            <div>DB 조회: Chunks 테이블에서 256개 청크 정보 가져오기 (순서대로!)</div>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <h4 style="color: #ffd93d; text-align: center;">🔗 청크 스트림 합치기</h4>
+            <div class="combine-demo">
+                <div class="stream-box">청크 0<br>스트림</div>
+                <div class="arrow">+</div>
+                <div class="stream-box">청크 1<br>스트림</div>
+                <div class="arrow">+</div>
+                <div class="stream-box">청크 2<br>스트림</div>
+                <div class="arrow">+</div>
+                <div style="text-align: center;">
+                    <div style="color: #ffd93d;">...</div>
+                    <div style="color: #4ecdc4; font-size: 0.9rem;">256개 연결</div>
+                </div>
+                <div class="arrow">=</div>
+                <div class="file-box">📹 완전한<br>movie.mp4</div>
+            </div>
+        </div>
+
+        <div class="flow-step">
+            <div class="step-number">4</div>
+            <div>클라이언트에게 하나의 연속된 스트림으로 전송</div>
+        </div>
+    </div>
+
+    <!-- 에러 처리 -->
+    <div class="step">
+        <div class="step-title">🚨 보너스: 에러 처리 및 복구</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+            <div>
+                <h4 style="color: #ff6b6b;">❌ 문제 상황</h4>
+                <div class="hash-demo">
+                    <strong>청크 손상 발견:</strong><br>
+                    • 저장된 해시: a1b2c3d4<br>
+                    • 계산된 해시: x9y8z7w6<br>
+                    • 결과: ❌ 불일치!
+                </div>
+            </div>
+
+            <div>
+                <h4 style="color: #4ecdc4;">✅ 복구 방법</h4>
+                <div class="hash-demo">
+                    <strong>자동 복구:</strong><br>
+                    • 다른 서버의 복사본 사용<br>
+                    • 또는 Erasure Coding으로 복구<br>
+                    • 클라이언트는 모름 (투명한 복구)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px;">
+        <h3 style="color: #ffd93d;">🎯 핵심 요약</h3>
+        <p style="font-size: 1.2rem; line-height: 1.6;">
+            <strong>큰 파일</strong> → <span class="highlight">4MB 청크</span> → <span class="highlight">3단계 폴더</span> → <span class="highlight">DB 기록</span> → <span class="highlight">스트림 합성</span> → <strong>완전한 파일</strong>
+        </p>
+        <p style="color: #4ecdc4; margin-top: 15px;">
+            이렇게 하면 1GB든 1TB든 효율적으로 저장하고 빠르게 찾을 수 있어요! 🚀
+        </p>
+    </div>
+</div>
+</body>
+</html>
