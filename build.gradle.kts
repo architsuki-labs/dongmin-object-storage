@@ -1,9 +1,12 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.5.4-SNAPSHOT"
-	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "1.9.25"
+
+	id("org.springframework.boot") version "3.2.11"
+	id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "com.akitsuki"
@@ -20,22 +23,14 @@ repositories {
 	maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-dependencies {
-//	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
-//	runtimeOnly("org.postgresql:postgresql")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
 	}
+}
+
+noArg {
+	annotation("jakarta.persistence.Entity")
 }
 
 allOpen {
@@ -44,6 +39,36 @@ allOpen {
 	annotation("jakarta.persistence.Embeddable")
 }
 
+dependencies {
+	// Core Spring Boot + JPA/Web
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+
+	// Kotlin support
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+	// PostgreSQL driver
+	runtimeOnly("org.postgresql:postgresql")
+
+	// JSONB support for Hibernate (needed for @TypeDef jsonb)
+	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+
+	// Dev tooling
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+	// Testing
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.withType<KotlinCompile> {
+	kotlinOptions {
+		jvmTarget = "21"
+	}
 }
