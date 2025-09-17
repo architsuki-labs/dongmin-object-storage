@@ -51,8 +51,8 @@ dependencies {
 	// PostgreSQL driver
 	runtimeOnly("org.postgresql:postgresql")
 
-	// JSONB support for Hibernate (needed for @TypeDef jsonb)
-	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
+	// JSONB support for Hibernate
+	implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.0")
 
 	// Dev tooling
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
