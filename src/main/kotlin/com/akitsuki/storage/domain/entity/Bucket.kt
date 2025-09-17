@@ -53,5 +53,4 @@ class Bucket(
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant = Instant.now()
-) {
-}
+)

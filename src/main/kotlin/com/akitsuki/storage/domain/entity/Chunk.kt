@@ -45,5 +45,4 @@ class Chunk(
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: Instant = Instant.now()
-) {
-}
+)

@@ -40,5 +40,4 @@ class AccessKey(
 
     @Column(name = "expires_at")
     val expiresAt: Instant? = null
-) {
-}
+)
