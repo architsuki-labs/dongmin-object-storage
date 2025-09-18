@@ -1,5 +1,6 @@
-package com.akitsuki.storage.domain.entity
+package com.akitsuki.storage.domain.auth.entity
 
+import com.akitsuki.storage.domain.auth.enums.AccessKeyStatus
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
@@ -40,4 +41,31 @@ class AccessKey(
 
     @Column(name = "expires_at")
     val expiresAt: Instant? = null
-)
+) {
+    
+    fun getStatus(): AccessKeyStatus {
+        return when {
+            !isActive -> AccessKeyStatus.INACTIVE
+            expiresAt != null && Instant.now().isAfter(expiresAt) -> AccessKeyStatus.EXPIRED
+            else -> AccessKeyStatus.ACTIVE
+        }
+    }
+    
+    
+    companion object {
+        fun create(
+            userId: UUID,
+            accessKeyId: String,
+            secretKeyHash: String,
+            expiresAt: Instant? = null
+        ): AccessKey {
+            return AccessKey(
+                userId = userId,
+                accessKeyId = accessKeyId,
+                secretKeyHash = secretKeyHash,
+                isActive = true,
+                expiresAt = expiresAt
+            )
+        }
+    }
+}

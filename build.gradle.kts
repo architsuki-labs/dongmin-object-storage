@@ -48,11 +48,20 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+	// HTTP
+	implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
+
 	// PostgreSQL driver
 	runtimeOnly("org.postgresql:postgresql")
 
-	// JSONB support for Hibernate
+	// JSON
 	implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.0")
+	implementation("com.google.code.gson:gson:2.13.1")
+
+	// JWT
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
 	// Dev tooling
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -61,6 +70,12 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// Swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+
+	// Spring Security (BCrypt용)
+	implementation("org.springframework.security:spring-security-crypto")
 }
 
 tasks.withType<Test> {

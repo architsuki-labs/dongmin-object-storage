@@ -1,4 +1,4 @@
-package com.akitsuki.storage.domain.entity
+package com.akitsuki.storage.domain.user.entity
 
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
