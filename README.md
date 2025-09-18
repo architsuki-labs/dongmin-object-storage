@@ -173,3 +173,10 @@ curl "http://localhost:8080/api/v1/test-bucket/hello.txt"
 - **수직 확장**: CPU/메모리 업그레이드
 - **수평 확장**: 다중 노드 클러스터링
 - **스토리지 확장**: RAID 구성 + 추가 디스크
+
+### 흐름도
+```
+Controller → Facade → Mapper → Domain Service → Repository
+    ↓          ↓         ↓            ↓             ↓
+   DTO    →   DTO   →  Command  →   Result    →   Entity
+```
